@@ -72,7 +72,7 @@ class Main extends PluginBase implements Listener{
 			case 0:
 			return 10000;
 			case 1:
-			return 20000;
+			return 30000;
 			case 2:
 			return 50000;
 			case 3:
@@ -86,7 +86,7 @@ class Main extends PluginBase implements Listener{
     	$form = $formapi->createCustomForm(function ($sender, $data) use($dataid, $ce){
     		if($data !== null){
     			if(Economy::getInstance()->myMoney($sender) < $this->getCost($dataid)){
-    				$sender->sendMessage(C::RED . "You don't have enough money! You need atleast $§4" . $this->getCost($dataid) . "!");
+    				$sender->sendMessage(C::RED . "You don't have enough money! It cost: $" . $this->getCost($dataid) . "!");
     				return;
     			}
 
@@ -96,12 +96,12 @@ class Main extends PluginBase implements Listener{
     			$item->setCustomName($ce->getRarityColor((int)$this->getNameByData($dataid, false)) . $this->getNameByData($dataid) . C::RESET . C::YELLOW . " Book");
     			$item->setLore([C::GRAY . "Tap ground to get random enchantment"]);
     			$sender->getInventory()->addItem($item);
-    			$sender->addXp(-$this->getCost($dataid));
+    			Economy::getInstance()->reduceMoney($sender, $this->getCost($dataid));
     		}
     	});
 
         $form->setTitle($ce->getRarityColor((int)$this->getNameByData($dataid, false)) . $this->getNameByData($dataid));
-        $form->addLabel("§bCost: §3" . $this->getCost($dataid) . " §bMoney");
+        $form->addLabel("§bCost: §3$" . $this->getCost($dataid));
         $form->sendToPlayer($sender);
     }
 
