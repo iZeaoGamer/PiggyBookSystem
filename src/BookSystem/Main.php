@@ -70,13 +70,13 @@ class Main extends PluginBase implements Listener{
 	public function getCost(int $data): int{
 		switch($data){
 			case 0:
-			return 400;
+			return 10000;
 			case 1:
-			return 800;
+			return 20000;
 			case 2:
-			return 2500;
+			return 50000;
 			case 3:
-			return 5000;
+			return 100000;
 		}
 	}
 
@@ -85,8 +85,8 @@ class Main extends PluginBase implements Listener{
     	$ce = $this->getServer()->getPluginManager()->getPlugin("PiggyCustomEnchants");
     	$form = $formapi->createCustomForm(function ($sender, $data) use($dataid, $ce){
     		if($data !== null){
-    			if($sender->getCurrentTotalXp() < $this->getCost($dataid)){
-    				$sender->sendMessage(C::RED . "You don't have enough Exp!");
+    			if(Economy::getInstance()->myMoney($sender) < $this->getCost($dataid)){
+    				$sender->sendMessage(C::RED . "You don't have enough money! You need atleast $§4" . $this->getCost($dataid) . "!");
     				return;
     			}
 
@@ -101,7 +101,7 @@ class Main extends PluginBase implements Listener{
     	});
 
         $form->setTitle($ce->getRarityColor((int)$this->getNameByData($dataid, false)) . $this->getNameByData($dataid));
-        $form->addLabel("Cost: " . $this->getCost($dataid) . " Exp");
+        $form->addLabel("§bCost: §3" . $this->getCost($dataid) . " §bMoney");
         $form->sendToPlayer($sender);
     }
 
