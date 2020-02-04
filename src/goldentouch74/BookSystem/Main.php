@@ -10,11 +10,13 @@ use pocketmine\item\Item;
 use pocketmine\nbt\tag\StringTag;
 use pocketmine\utils\Config;
 use pocketmine\utils\TextFormat as C;
+use pocketmine\utils\TextFormat;
 use pocketmine\event\Listener;
 use pocketmine\event\player\PlayerInteractEvent;
 use pocketmine\command\{
     Command, CommandSender
 };
+use pocketmine\Server;
 
 use jojoe77777\FormAPI\SimpleForm;
 use jojoe77777\FormAPI\CustomForm;
@@ -28,6 +30,7 @@ class Main extends PluginBase implements Listener {
 
     /* @var Config $config */
     public $config;
+    public $overs = 0;
 
     public function onLoad(){
         @mkdir($this->getDataFolder());
@@ -106,7 +109,7 @@ class Main extends PluginBase implements Listener {
         if ($ce instanceof PiggyCustomEnchants) {
             $form = new CustomForm(function (Player $player, $data) use ($dataid, $ce) {
                 if ($data !== null) {
-                    if ($ce instanceof PiggyCustomEnchants) {
+                  //  if ($ce instanceof PiggyCustomEnchants) {
                         if ($player->getCurrentTotalXp() < $this->getCost($dataid)) {
                             $player->sendMessage(C::RED . "You don't have enough Exp!");
                             return;
@@ -114,19 +117,24 @@ class Main extends PluginBase implements Listener {
                         $item = Item::get(340);
                         $nbt = $item->getNamedTag();
                         $nbt->setString("ceid", (string)$dataid);
-                        $item->setCustomName((int)$this->getNameByData($dataid, false) . $this->getNameByData($dataid) . C::RESET . C::YELLOW . " Book");
+                        $item->setCustomName($this->getNameByData($dataid) . C::RESET . C::YELLOW . " Book");
                         $item->setLore([C::GRAY . "Tap ground to get random enchantment"]);
                         $player->getInventory()->addItem($item);
                         $player->addXp(-$this->getCost($dataid));
                     }
-                }
+                
             });
             $form->setTitle((int)$this->getNameByData($dataid, false) . $this->getNameByData($dataid));
             $form->addLabel("Cost: " . $this->getCost($dataid) . " Exp");
             $player->sendForm($form);
         }
     }
-
+    public function setOvers(int $overs){
+        $this->overs = $overs;
+    }
+    public function getOvers(): int{
+        return $this->overs;
+    }
     public function onInteract(PlayerInteractEvent $e): void{
         $player = $e->getPlayer();
         $item = $e->getItem();
@@ -137,9 +145,18 @@ class Main extends PluginBase implements Listener {
                     $e->setCancelled();
 
                     $id = $item->getNamedTag()->getString("ceid");
+                    $this->getLogger()->info("Plugin passing cid section.");
+                    $this->setOvers(0);
 
-                    foreach(CustomEnchantManager::getEnchantments() as $eid => $data) {
-                        if ($data[3] == $this->getNameByData((int)$id)) {
+                 //foreach(CustomEnchantManager::getEnchantments() as $eid => $data) {
+                //     if(CustomEnchantManager::getEnchantments() instanceof CustomEnchant){
+               // $manager = Server::getInstance()->getPluginManager()->getPlugin("PiggyCustomEnchants");
+              //  if(!$manager instanceof CustomEnchantManager){
+                   // return;
+          //      $manager = CustomEnchantManager;
+                foreach(CustomEnchantManager::$enchants as $enchantmanager => $enchantment){
+                      if ($enchantment->getName() !== $this->getNameByData((int)$id)){
+                    
                             switch ($id) {
                                 case 0: //Common
                                     $enchs = [114, 101, 109, 601, 100, 405];
@@ -156,22 +173,36 @@ class Main extends PluginBase implements Listener {
                             }
                             $enchanted = false;
 
-                            if ($enchanted == false) {
+                            if ($enchanted == false && $this->getOvers() < 1) {
                                 $enchanted = true;
+                                $this->setOvers($this->getOvers() + 1);
                                 $info["ench"] = $enchs[array_rand($enchs)];
-                                $ench = CustomEnchantManager::getEnchantment($info["ench"]);
-                                if (!$ench instanceof CustomEnchant){
-                                    return;
-                                }
-                                $enchName = CustomEnchantManager::getEnchantmentByName($info["ench");
-                                $info["lvl"] = mt_rand(1, $ench->getMaxLevel());
+                                   $enchant = is_numeric($info["ench"]) ? CustomEnchantManager::getEnchantment((int)$info["ench"]) : CustomEnchantManager::getEnchantmentByName($info["ench"]);
+                    if ($enchant == null) {
+                        $player->sendMessage(TextFormat::RED . "Invalid enchantment.");
+                        return;
+                    }
+                              //  $ench = CustomEnchantManager::getEnchantment($info["ench"]);
+                              //  if (!$ench instanceof CustomEnchant){
+                                  //  $player->sendMessage(TextFormat::colorize("&cEnchant not found."));
+                              //  }else{
+                                    
+                                
+                                //$enchName = CustomEnchantManager::getEnchantmentByName($info["ench"]);
+                                $info["lvl"] = mt_rand(1, $enchant->getMaxLevel());
                                 $book = Item::get(Item::ENCHANTED_BOOK);
-                                 $item->addEnchantment(new EnchantmentInstance($enchName, $info["lvl"]);
+                                $hand = $player->getInventory()->getItemInHand();
+                                $player->getInventory()->setItemInHand($hand->setCount($hand->getCount() - 1));
+                             //   $hand = $player->getInventory()->getItemInHand();
+                                 $book->addEnchantment(new EnchantmentInstance($enchant, $info["lvl"]));
+                           $player->getInventory()->addItem($book);
+                           $player->sendMessage(TextFormat::colorize("&aEnchant success."));
                             }
                         }
                     }
-                }
             }
+    
         }
     }
+}
 }
