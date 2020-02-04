@@ -19,7 +19,10 @@ use pocketmine\command\{
 use jojoe77777\FormAPI\SimpleForm;
 use jojoe77777\FormAPI\CustomForm;
 
-use DaPigGuy\PiggyCustomEnchants\CustomEnchants\CustomEnchants;
+use DaPigGuy\PiggyCustomEnchants\CustomEnchants\CustomEnchant;
+use DaPigGuy\PiggyCustomEnchants\PiggyCustomEnchants;
+use DaPigGuy\PiggyCustomEnchants\CustomEnchantManager;
+use pocketmine\item\enchantment\EnchantmentInstance;
 
 class Main extends PluginBase implements Listener {
 
@@ -100,10 +103,10 @@ class Main extends PluginBase implements Listener {
 
     public function confirm(Player $player, int $dataid): void{
         $ce = $this->getServer()->getPluginManager()->getPlugin("PiggyCustomEnchants");
-        if ($ce instanceof \DaPigGuy\PiggyCustomEnchants\Main) {
+        if ($ce instanceof PiggyCustomEnchants) {
             $form = new CustomForm(function (Player $player, $data) use ($dataid, $ce) {
                 if ($data !== null) {
-                    if ($ce instanceof \DaPigGuy\PiggyCustomEnchants\Main) {
+                    if ($ce instanceof PiggyCustomEnchants) {
                         if ($player->getCurrentTotalXp() < $this->getCost($dataid)) {
                             $player->sendMessage(C::RED . "You don't have enough Exp!");
                             return;
@@ -128,14 +131,14 @@ class Main extends PluginBase implements Listener {
         $player = $e->getPlayer();
         $item = $e->getItem();
         $ce = $this->getServer()->getPluginManager()->getPlugin("PiggyCustomEnchants");
-        if ($ce instanceof \DaPigGuy\PiggyCustomEnchants\Main) {
+        if ($ce instanceof PiggyCustomEnchants) {
             if($item->getId() == 340){
                 if($item->getNamedTag()->hasTag("ceid", StringTag::class)) {
                     $e->setCancelled();
 
                     $id = $item->getNamedTag()->getString("ceid");
 
-                    foreach ($ce->enchants as $eid => $data) {
+                    foreach(CustomEnchantManager::getEnchantments() as $eid => $data) {
                         if ($data[3] == $this->getNameByData((int)$id)) {
                             switch ($id) {
                                 case 0: //Common
@@ -156,11 +159,14 @@ class Main extends PluginBase implements Listener {
                             if ($enchanted == false) {
                                 $enchanted = true;
                                 $info["ench"] = $enchs[array_rand($enchs)];
-                                $ench = CustomEnchants::getEnchantment($info["ench"]);
-                                $info["lvl"] = mt_rand(1, $ce->getEnchantMaxLevel($ench));
+                                $ench = CustomEnchantManager::getEnchantment($info["ench"]);
+                                if (!$ench instanceof CustomEnchant){
+                                    return;
+                                }
+                                $enchName = CustomEnchantManager::getEnchantmentByName($info["ench");
+                                $info["lvl"] = mt_rand(1, $ench->getMaxLevel());
                                 $book = Item::get(Item::ENCHANTED_BOOK);
-                                $player->getInventory()->setItemInHand($ce->addEnchantment($player->getInventory()->getItemInHand(), $info["ench"], $info["lvl"], $player->hasPermission("piggycustomenchants.overridecheck") ? false : true, $player));
-                                return;
+                                 $item->addEnchantment(new EnchantmentInstance($enchName, $info["lvl"]);
                             }
                         }
                     }
