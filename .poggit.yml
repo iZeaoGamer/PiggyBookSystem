@@ -1,9 +1,11 @@
---- # Poggit-CI Manifest. Open the CI at https://poggit.pmmp.io/ci/goldentouch74/PiggyBookSystem
+--- # Poggit-CI Manifest. Open the CI at https://poggit.pmmp.io/ci/DaPigGuy/PiggyCustomEnchants
 branches:
 - patch-1
 projects:
   PiggyBookSystem:
+    path: ""
+    icon: ""
     libs:
-    - src jojoe77777/FormAPI/libFormAPI
-    version: ^1.3
+    - src: jojoe77777/FormAPI/libFormAPI
+      version: ^1.3
 ...
