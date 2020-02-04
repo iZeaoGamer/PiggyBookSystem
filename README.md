@@ -5,7 +5,7 @@ Once you have bought the custom enchantment book, you can interact with it, esse
 After that, you can drag the book, and drop it on the appropriate item, depending on what item the custom enchantment is compatible with.
 
 
-[![](https://poggit.pmmp.io/shield.state/BookSystem)](https://poggit.pmmp.io/p/BookSystem
+[![](https://poggit.pmmp.io/shield.state/BookSystem)]
 
 
 credits:
