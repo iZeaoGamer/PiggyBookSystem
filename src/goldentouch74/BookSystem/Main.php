@@ -41,15 +41,15 @@ class Main extends PluginBase implements Listener {
     public function onCommand(CommandSender $sender, Command $cmd, string $label, array $args): bool{
         if ($sender instanceof Player) {
             $ce = $this->getServer()->getPluginManager()->getPlugin("PiggyCustomEnchants");
-            if ($ce instanceof \DaPigGuy\PiggyCustomEnchants\Main) {
+            if ($ce instanceof PiggyCustomEnchants) {
                 $form = new SimpleForm(function ($sender, $data){
                     if(!is_null($data)) $this->confirm($sender, $data);
                 });
                 $form->setTitle("CustomEnchants Shop");
-                $form->addButton($ce->getRarityColor(10) . $this->getNameByData(0));
-                $form->addButton($ce->getRarityColor(5) . $this->getNameByData(1));
-                $form->addButton($ce->getRarityColor(2) . $this->getNameByData(2));
-                $form->addButton($ce->getRarityColor(1) . $this->getNameByData(3));
+                $form->addButton($this->getNameByData(0));
+                $form->addButton($this->getNameByData(1));
+                $form->addButton($this->getNameByData(2));
+                $form->addButton($this->getNameByData(3));
                 $sender->sendForm($form);
                 return true;
             }
@@ -114,14 +114,14 @@ class Main extends PluginBase implements Listener {
                         $item = Item::get(340);
                         $nbt = $item->getNamedTag();
                         $nbt->setString("ceid", (string)$dataid);
-                        $item->setCustomName($ce->getRarityColor((int)$this->getNameByData($dataid, false)) . $this->getNameByData($dataid) . C::RESET . C::YELLOW . " Book");
+                        $item->setCustomName((int)$this->getNameByData($dataid, false) . $this->getNameByData($dataid) . C::RESET . C::YELLOW . " Book");
                         $item->setLore([C::GRAY . "Tap ground to get random enchantment"]);
                         $player->getInventory()->addItem($item);
                         $player->addXp(-$this->getCost($dataid));
                     }
                 }
             });
-            $form->setTitle($ce->getRarityColor((int)$this->getNameByData($dataid, false)) . $this->getNameByData($dataid));
+            $form->setTitle((int)$this->getNameByData($dataid, false) . $this->getNameByData($dataid));
             $form->addLabel("Cost: " . $this->getCost($dataid) . " Exp");
             $player->sendForm($form);
         }
